@@ -1,5 +1,5 @@
 # Federated Domain Generalization with Generalization Adjustment - CVPR 2023
-FEDUG
+FEDUGa
 ## Video of our work
 [![Alt text](https://img.youtube.com/vi/EESJrJGCSR4/0.jpg)](https://www.youtube.com/watch?v=EESJrJGCSR4)
 
