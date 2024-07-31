@@ -5,5 +5,5 @@ terra_incognita_list = ['100', '38', '43', '46']
 
 log_count_path = '/home/ubuntu/data/pycharm/FedUG/logs'
 pacs_path = '/home/ubuntu/data/pycharm/FedUG/PACS_DataSet'
-officehome_path = '/home/ubuntu/data/pycharm/FedUG/OfficeHomeDataset_10072016'
+officehome_path = '/home/ubuntu/data/pycharm/FedUG/OfficeHomeDataset'
 terrainc_path = ''

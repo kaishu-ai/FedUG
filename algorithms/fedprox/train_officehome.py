@@ -1,9 +1,11 @@
 import os
 import argparse
+
+import configs.default
 from utils.log_utils import *
 from network.get_network import GetNetwork
 from torch.utils.tensorboard.writer import SummaryWriter
-from data.pacs_dataset import PACS_FedDG
+from data.officehome_dataset import OfficeHome_FedDG
 from utils.classification_metric import Classification 
 import torch
 from utils.fed_merge import Cal_Weight_Dict, FedAvg, FedUpdate
@@ -14,12 +16,12 @@ from network.FedOptimizer.FedProx import FedProx
 
 def get_argparse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='pacs', choices=['pacs'], help='Name of dataset')
+    parser.add_argument("--dataset", type=str, default='officehome', choices=['officehome'], help='Name of dataset')
     parser.add_argument("--model", type=str, default='resnet18',
                         choices=['resnet18', 'resnet50'], help='model name')
     parser.add_argument("--test_domain", type=str, default='p',
-                        choices=['p', 'a', 'c', 's'], help='the domain name for testing')
-    parser.add_argument('--num_classes', help='number of classes default 7', type=int, default=7)
+                        choices=['p', 'a', 'c', 'r'], help='the domain name for testing')
+    parser.add_argument('--num_classes', help='number of classes default 65', type=int, default=65)
     parser.add_argument('--batch_size', help='batch_size', type=int, default=16)
     parser.add_argument('--local_epochs', help='epochs number', type=int, default=5)
     parser.add_argument('--comm', help='epochs number', type=int, default=100)
@@ -40,7 +42,7 @@ def GetFedModel(args, num_classes, is_train=True):
     model_dict = {}
     optimizer_dict = {}
     scheduler_dict = {}
-    for domain_name in ['p', 'a', 'c', 's']:
+    for domain_name in configs.default.officehome_domain_list:
         model_dict[domain_name], _ = GetNetwork(args, num_classes, is_train)
         model_dict[domain_name] = model_dict[domain_name].cuda()
         optimizer_dict[domain_name] = FedProx(model_dict[domain_name].parameters(), lr=args.lr, momentum=0.9,
@@ -61,7 +63,7 @@ def main():
     Save_Hyperparameter(log_dir, args)
     
     '''dataset and dataloader'''
-    dataobj = PACS_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
+    dataobj = OfficeHome_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
     dataloader_dict, dataset_dict = dataobj.GetData()
     
     '''model'''

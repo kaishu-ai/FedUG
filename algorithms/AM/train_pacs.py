@@ -14,8 +14,8 @@ from data.Fourier_Aug import Shuffle_Batch_Data, Batch_FFT2_Amp_MixUp
 def get_argparse():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default='pacs', choices=['pacs'], help='Name of dataset')
-    parser.add_argument("--model", type=str, default='resnet18_rsc',
-                        choices=['resnet18_rsc', 'resnet50_rsc'], help='model name')
+    parser.add_argument("--model", type=str, default='resnet18',
+                        choices=['resnet18', 'resnet50'], help='model name')
     parser.add_argument("--test_domain", type=str, default='p',
                         choices=['p', 'a', 'c', 's'], help='the domain name for testing')
     parser.add_argument('--num_classes', help='number of classes default 7', type=int, default=7)
@@ -26,6 +26,7 @@ def get_argparse():
     parser.add_argument("--lr_policy", type=str, default='step', choices=['step'],
                         help="learning rate scheduler policy")
     parser.add_argument('--note', help='note of experimental settings', type=str, default='fedavg')
+    parser.add_argument('--csustyle_layers', help='csu layers', type=str, default='[]')
     parser.add_argument('--display', help='display in controller', action='store_true')
     return parser.parse_args()
  
@@ -62,7 +63,7 @@ def site_train(comm_rounds, site_name, args, model, optimizer, scheduler, datalo
 
 def main():
     '''log part'''
-    file_name = 'fedavg_'+os.path.split(__file__)[1].replace('.py', '')
+    file_name = 'AM_'+os.path.split(__file__)[1].replace('.py', '')
     args = get_argparse()
     log_dir, tensorboard_dir = Gen_Log_Dir(args, file_name=file_name)
     log_ten = SummaryWriter(log_dir=tensorboard_dir)

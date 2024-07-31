@@ -5,7 +5,7 @@ from PIL import Image
 import numpy as np
 import cv2
 
-dataloader_kwargs = {'num_workers': 4, 'pin_memory': True}
+dataloader_kwargs = {'num_workers': 16, 'pin_memory': True}
 def GetDataLoaderDict(dataset_dict, batch_size):
     dataloader_dict = {}
     for dataset_name in dataset_dict.keys():

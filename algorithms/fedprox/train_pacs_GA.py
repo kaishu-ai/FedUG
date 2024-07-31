@@ -28,8 +28,9 @@ def get_argparse():
 
     parser.add_argument("--lr_policy", type=str, default='step', choices=['step'],
                         help="learning rate scheduler policy")
-    parser.add_argument("--fair", type=str, default='acc', choices=['acc', 'loss'],
+    parser.add_argument("--fair", type=str, default='uncertainty', choices=['acc', 'loss', 'uncertainty'],
                         help="the fairness metric for FedAvg")
+    parser.add_argument('--csustyle_layers', help='csu layers', type=str, default='[]')
     parser.add_argument('--note', help='note of experimental settings', type=str, default='generalization_adjustment')
     parser.add_argument('--display', help='display in controller', action='store_true') 
 
@@ -53,7 +54,7 @@ def GetFedModel(args, num_classes, is_train=True):
 
 
 def main():
-    file_name = 'GA_'+os.path.split(__file__)[1].replace('.py', '')
+    file_name = 'GA_fedprox_'+os.path.split(__file__)[1].replace('.py', '')
     args = get_argparse()
     log_dir, tensorboard_dir = Gen_Log_Dir(args, file_name=file_name)
     log_ten = SummaryWriter(log_dir=tensorboard_dir)

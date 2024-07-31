@@ -177,7 +177,8 @@ class ResNet(nn.Module):
 
 
 class ResNet_RSC(nn.Module):
-    def __init__(self, block, layers, num_classes=100):
+    def __init__(self, block, layers, csustyle_layers=[],csustyle_p=0.5,
+        csustyle_alpha=0.3, num_classes=100):
         self.inplanes = 64
         super(ResNet_RSC, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -189,6 +190,12 @@ class ResNet_RSC(nn.Module):
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
+        self.pertubration0 = CorrelatedDistributionUncertainty(p=csustyle_p, alpha=csustyle_alpha) if 'layer0' in  csustyle_layers else nn.Identity()
+        self.pertubration1 = CorrelatedDistributionUncertainty(p=csustyle_p, alpha=csustyle_alpha) if 'layer1' in  csustyle_layers else nn.Identity()
+        self.pertubration2 = CorrelatedDistributionUncertainty(p=csustyle_p, alpha=csustyle_alpha) if 'layer2' in  csustyle_layers else nn.Identity()
+        self.pertubration3 = CorrelatedDistributionUncertainty(p=csustyle_p, alpha=csustyle_alpha) if 'layer3' in  csustyle_layers else nn.Identity()
+        self.pertubration4 = CorrelatedDistributionUncertainty(p=csustyle_p, alpha=csustyle_alpha) if 'layer4' in  csustyle_layers else nn.Identity()
+        self.pertubration5 = CorrelatedDistributionUncertainty(p=csustyle_p, alpha=csustyle_alpha) if 'layer5' in  csustyle_layers else nn.Identity()
         self.avgpool = nn.AvgPool2d(7, stride=1)
         # self.jigsaw_classifier = nn.Linear(512 * block.expansion, jigsaw_classes)
         self.class_classifier = nn.Linear(512 * block.expansion, num_classes)
@@ -223,14 +230,20 @@ class ResNet_RSC(nn.Module):
 
     def forward(self, x, gt=None, flag=None):
         x = self.conv1(x)
+        x = self.pertubration0(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
+        x = self.pertubration1(x)
 
         x = self.layer1(x)
+        x = self.pertubration2(x)
         x = self.layer2(x)
+        x = self.pertubration3(x)
         x = self.layer3(x)
+        x = self.pertubration4(x)
         x = self.layer4(x)
+        x = self.pertubration5(x)
 
         if flag: 
             self.eval()

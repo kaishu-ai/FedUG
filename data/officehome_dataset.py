@@ -8,7 +8,7 @@ officehome_name_dict = {
     'p': 'Product',
     'a': 'Art',
     'c': 'Clipart',
-    'r': 'Real_World',
+    'r': 'RealWorld'
 }
 transform_train = transforms.Compose(
             [transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
@@ -44,7 +44,7 @@ class OfficeHome_SingleDomain():
             self.transform = transform_test
         self.seed = seed
         
-        self.imgs, self.labels = OfficeHome_SingleDomain.read_txt(self.txt_path)
+        self.imgs, self.labels = OfficeHome_SingleDomain.read_txt(self.txt_path,self.root_path)
         
         if self.split == 'train' or self.split == 'val':
             random.seed(self.seed)
@@ -68,7 +68,7 @@ class OfficeHome_SingleDomain():
         return train_l, val_l
         
     @staticmethod
-    def read_txt(txt_path):
+    def read_txt(txt_path,root_path):
         imgs = []
         labels = []
         with open(txt_path, 'r') as f:
@@ -77,7 +77,7 @@ class OfficeHome_SingleDomain():
         for line_txt in contents:
             line_txt = line_txt.replace('\n', '')
             line_txt_list = line_txt.split(' ')
-            imgs.append(line_txt_list[0])
+            imgs.append(os.path.join(root_path,line_txt_list[0]))
             labels.append(int(line_txt_list[1]))
             
         return imgs, labels

@@ -3,7 +3,7 @@ import argparse
 from utils.log_utils import *
 from network.get_network import GetNetwork
 from torch.utils.tensorboard.writer import SummaryWriter
-from data.pacs_dataset import PACS_FedDG
+from data.officehome_dataset import OfficeHome_FedDG
 from utils.classification_metric import Classification
 import torch
 from utils.fed_merge import Cal_Weight_Dict, FedAvg, FedUpdate
@@ -26,6 +26,7 @@ def get_argparse():
     parser.add_argument('--lr', help='learning rate', type=float, default=0.001)
     parser.add_argument("--lr_policy", type=str, default='step', choices=['step'],
                         help="learning rate scheduler policy")
+    parser.add_argument('--csustyle_layers', help='csu layers', type=str, default='[]')
     parser.add_argument('--note', help='note of experimental settings', type=str, default='fedavg')
     parser.add_argument('--display', help='display in controller', action='store_true') # 默认false 即不展示
     return parser.parse_args()
@@ -86,7 +87,7 @@ def main():
     Save_Hyperparameter(log_dir, args)
     
     '''dataset and dataloader'''
-    dataobj = PACS_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
+    dataobj = OfficeHome_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
     dataloader_dict, dataset_dict = dataobj.GetData()
     
     '''model'''

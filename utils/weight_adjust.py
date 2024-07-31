@@ -3,7 +3,7 @@ import numpy as np
 def refine_weight_dict_by_GA(weight_dict, site_before_results_dict, site_after_results_dict, step_size=0.1, fair_metric='loss'):
     if fair_metric == 'acc':
         signal = -1.0
-    elif fair_metric == 'loss':
+    elif fair_metric == 'loss' or fair_metric == 'uncertainty':
         signal = 1.0
     else:
         raise ValueError('fair_metric must be acc or loss')

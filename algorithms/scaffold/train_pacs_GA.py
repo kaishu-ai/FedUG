@@ -4,7 +4,7 @@ import torch
 from network.get_network import GetNetwork
 from utils.log_utils import *
 from torch.utils.tensorboard.writer import SummaryWriter
-from data.pacs_dataset import PACS_FedDG
+from data.officehome_dataset import OfficeHome_FedDG
 from utils.classification_metric import Classification 
 from utils.fed_merge import FedAvg, FedUpdate
 from utils.trainval_func import site_evaluation, SaveCheckPoint
@@ -28,8 +28,9 @@ def get_argparse():
     parser.add_argument('--step_size', help='rate weight step', type=float, default=0.2)
     parser.add_argument("--lr_policy", type=str, default='step', choices=['step'],
                         help="learning rate scheduler policy")
-    parser.add_argument("--fair", type=str, default='acc', choices=['acc', 'loss'],
+    parser.add_argument("--fair", type=str, default='uncertainty', choices=['acc', 'loss', 'uncertainty'],
                         help="the fairness metric for FedAvg")
+    parser.add_argument('--csustyle_layers', help='csu layers', type=str, default='[]')
     parser.add_argument('--note', help='note of experimental settings', type=str, default='generalization_adjustment')
     parser.add_argument('--display', help='display in controller', action='store_true') 
 
@@ -84,7 +85,7 @@ def GetFedModel(args, num_classes, is_train=True):
    
 
 def main():
-    file_name = 'GA_'+os.path.split(__file__)[1].replace('.py', '')
+    file_name = 'GA_scaffold_'+os.path.split(__file__)[1].replace('.py', '')
     args = get_argparse()
     log_dir, tensorboard_dir = Gen_Log_Dir(args, file_name=file_name)
     log_ten = SummaryWriter(log_dir=tensorboard_dir)
@@ -92,7 +93,7 @@ def main():
     Save_Hyperparameter(log_dir, args)
     
     '''dataset and dataloader'''
-    dataobj = PACS_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
+    dataobj = OfficeHome_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
     dataloader_dict, dataset_dict = dataobj.GetData()
     
     '''model相关'''

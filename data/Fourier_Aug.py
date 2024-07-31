@@ -13,6 +13,28 @@ def FFT2_Amp_MixUp(data_original, data_aug, lamda):
 def Combine_AmplitudeANDPhase(amp, phe):
     return torch.mul(amp, torch.exp(1j*phe))
 
+def Shuffle_Batch_Data(imgs):
+    """
+    Shuffle the input tensor along the batch dimension (B).
+
+    Args:
+        imgs (torch.Tensor): Input tensor of shape (B, C, H, W)
+
+    Returns:
+        torch.Tensor: Shuffled tensor of the same shape
+    """
+    # 获取当前 batch 的大小
+    batch_size = imgs.size(0)
+
+    # 生成一个随机的索引
+    indices = torch.randperm(batch_size)
+
+    # 使用索引对 imgs 进行打乱
+    shuffled_imgs = imgs[indices]
+
+    return shuffled_imgs
+
+
 def FFT_Exchange_Amplitude(domain_data1, domain_data2):
     fft_domain1 = torch.fft.fft2(domain_data1)
     fft_domain2 = torch.fft.fft2(domain_data2)

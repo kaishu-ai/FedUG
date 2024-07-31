@@ -1,59 +1,37 @@
 import os
 import argparse
-from utils.log_utils import *
 from network.get_network import GetNetwork
 from torch.utils.tensorboard.writer import SummaryWriter
-from data.pacs_dataset import PACS_FedDG
+from data.officehome_dataset import OfficeHome_FedDG
 from utils.classification_metric import Classification 
-import torch
+from utils.log_utils import *
 from utils.fed_merge import Cal_Weight_Dict, FedAvg, FedUpdate
-from utils.trainval_func import site_train, site_evaluation, SaveCheckPoint
+from utils.trainval_func import site_evaluation, site_train, GetFedModel, SaveCheckPoint
 import torch.nn.functional as F
-from torch.optim.optimizer import Optimizer
-from network.FedOptimizer.FedProx import FedProx
+from tqdm import tqdm
 
 def get_argparse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default='pacs', choices=['pacs'], help='Name of dataset')
-    parser.add_argument("--model", type=str, default='resnet18',
-                        choices=['resnet18', 'resnet50'], help='model name')
+    parser.add_argument("--dataset", type=str, default='officehome', choices=['officehome'], help='Name of dataset')
+    parser.add_argument("--model", type=str, default='resnet18_rsc',
+                        choices=['resnet18_rsc', 'resnet50_rsc'], help='model name')
     parser.add_argument("--test_domain", type=str, default='p',
-                        choices=['p', 'a', 'c', 's'], help='the domain name for testing')
-    parser.add_argument('--num_classes', help='number of classes default 7', type=int, default=7)
+                        choices=['p', 'a', 'c', 'r'], help='the domain name for testing')
+    parser.add_argument('--num_classes', help='number of classes default 65', type=int, default=65)
     parser.add_argument('--batch_size', help='batch_size', type=int, default=16)
     parser.add_argument('--local_epochs', help='epochs number', type=int, default=5)
     parser.add_argument('--comm', help='epochs number', type=int, default=100)
     parser.add_argument('--lr', help='learning rate', type=float, default=0.001)
-    parser.add_argument('--mu', help='mu for FedProx', type=float, default=0.1)
     parser.add_argument("--lr_policy", type=str, default='step', choices=['step'],
                         help="learning rate scheduler policy")
     parser.add_argument('--csustyle_layers', help='csu layers', type=str, default='[]')
     parser.add_argument('--note', help='note of experimental settings', type=str, default='fedavg')
-    parser.add_argument('--display', help='display in controller', action='store_true') # 默认false 即不展示
-    
+    parser.add_argument('--display', help='display in controller', action='store_true')
     return parser.parse_args()
-
-
-def GetFedModel(args, num_classes, is_train=True):
-    global_model, feature_level = GetNetwork(args, args.num_classes, True)
-    global_model = global_model.cuda()
-    model_dict = {}
-    optimizer_dict = {}
-    scheduler_dict = {}
-    for domain_name in ['p', 'a', 'c', 's']:
-        model_dict[domain_name], _ = GetNetwork(args, num_classes, is_train)
-        model_dict[domain_name] = model_dict[domain_name].cuda()
-        optimizer_dict[domain_name] = FedProx(model_dict[domain_name].parameters(), lr=args.lr, momentum=0.9,
-                                                      weight_decay=5e-4, mu=args.mu)
-        optimizer_dict[domain_name].update_old_init(global_model.parameters()) # 保存初始化的wt
-        if args.lr_policy == 'step':
-            scheduler_dict[domain_name] = torch.optim.lr_scheduler.StepLR(optimizer_dict[domain_name], step_size=args.local_epochs * args.comm, gamma=0.1)
-    return global_model, model_dict, optimizer_dict, scheduler_dict
-
-
+ 
 def main():
     '''log part'''
-    file_name = 'fedprox_'+os.path.split(__file__)[1].replace('.py', '')
+    file_name = 'rsc_'+os.path.split(__file__)[1].replace('.py', '')
     args = get_argparse()
     log_dir, tensorboard_dir = Gen_Log_Dir(args, file_name=file_name)
     log_ten = SummaryWriter(log_dir=tensorboard_dir)
@@ -61,7 +39,7 @@ def main():
     Save_Hyperparameter(log_dir, args)
     
     '''dataset and dataloader'''
-    dataobj = PACS_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
+    dataobj = OfficeHome_FedDG(test_domain=args.test_domain, batch_size=args.batch_size)
     dataloader_dict, dataset_dict = dataobj.GetData()
     
     '''model'''
@@ -99,4 +77,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-    

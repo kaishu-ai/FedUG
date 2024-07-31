@@ -1,5 +1,11 @@
 import torch.nn.functional as F
-
+import torch
+def entropy(logits):
+    p = F.softmax(logits, dim=1)
+    logp = F.log_softmax(logits, dim=1)
+    plogp = p * logp
+    entropy = -torch.sum(plogp)
+    return entropy
 class Classification(object):
     def __init__(self):
         self.init()
@@ -11,6 +17,7 @@ class Classification(object):
         self.correct_count = 0
         self.total_count = 0
         self.loss = 0
+        self.uncertainty = 0
     
     def update(self, pred, label, easy_model=False):
         pred = pred.cpu()
@@ -21,6 +28,7 @@ class Classification(object):
         else:
             loss = F.cross_entropy(pred, label).item() * len(label)
             self.loss += loss
+            self.uncertainty += entropy(pred).item()
             pred = pred.data.max(1)[1]
         self.pred_list.extend(pred.numpy())
         self.label_list.extend(label.numpy())
@@ -31,5 +39,6 @@ class Classification(object):
         result_dict = {}
         result_dict['acc'] = float(self.correct_count) / float(self.total_count)
         result_dict['loss'] = float(self.loss) / float(self.total_count)
+        result_dict['uncertainty'] = float(self.uncertainty) / float(self.total_count)
         self.init()
         return result_dict

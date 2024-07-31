@@ -22,8 +22,11 @@ def get_argparse():
     parser.add_argument('--step_size', help='rate weight step', type=float, default=0.2)
     parser.add_argument("--lr_policy", type=str, default='step', choices=['step'],
                         help="learning rate scheduler policy")
-    parser.add_argument("--fair", type=str, default='acc', choices=['acc', 'loss'],
+
+    parser.add_argument("--fair", type=str, default='uncertainty', choices=['acc', 'loss', 'uncertainty'],
                         help="the fairness metric for FedAvg")
+    parser.add_argument('--csustyle_layers', help='csu layers', type=str, default='[]')
+
     parser.add_argument('--note', help='note of experimental settings', type=str, default='generalization_adjustment')
     parser.add_argument('--display', help='display in controller', action='store_true') 
 
